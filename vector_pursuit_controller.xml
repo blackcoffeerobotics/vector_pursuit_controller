@@ -1,0 +1,9 @@
+<class_libraries>
+    <library path="vector_pursuit_controller">
+        <class type="vector_pursuit_controller::VectorPursuitController" base_class_type="nav2_core::Controller">
+            <description>
+                vector_pursuit_controller
+            </description>
+        </class>
+    </library>
+</class_libraries>
