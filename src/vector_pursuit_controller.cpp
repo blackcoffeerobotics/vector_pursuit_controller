@@ -118,7 +118,7 @@ void VectorPursuitController::configure(
     node, plugin_name_ + ".use_interpolation",
     rclcpp::ParameterValue(true));
   declare_parameter_if_not_declared(
-    node, plugin_name_ + ".use_heading_from_path", 
+    node, plugin_name_ + ".use_heading_from_path",
     rclcpp::ParameterValue(true));
 
   node->get_parameter(plugin_name_ + ".p_gain", k_);
@@ -192,9 +192,10 @@ void VectorPursuitController::configure(
     use_rotate_to_heading_ = true;
   }
 
-  if (use_rotate_to_heading_ && allow_reversing_){
+  if (use_rotate_to_heading_ && allow_reversing_) {
     RCLCPP_WARN(
-      logger_, "Both use_rotate_to_heading and allow_reversing are set to true. Reversing will be overriden in all cases.");
+      logger_, "Both use_rotate_to_heading and allow_reversing are set to true. "
+      "Reversing will be overriden in all cases.");
   }
 
   global_path_pub_ = node->create_publisher<nav_msgs::msg::Path>("received_global_plan", 1);
@@ -329,7 +330,7 @@ geometry_msgs::msg::TwistStamped VectorPursuitController::computeVelocityCommand
   if (dist_to_cusp < lookahead_dist) {
     lookahead_dist = dist_to_cusp;
   }
-  
+
   auto lookahead_point = getLookAheadPoint(lookahead_dist, transformed_plan);
 
   // Publish target point for visualization
@@ -557,7 +558,7 @@ geometry_msgs::msg::Quaternion VectorPursuitController::getOrientation(
 double getPositiveRadians(double angle)
 {
   // check for infinity or NaN
-  if (isnan(angle) || isinf(angle)) return 0.0;
+  if (isnan(angle) || isinf(angle)) {return 0.0;}
 
   while (angle < 0.0) {
     angle += 2.0 * M_PI;
@@ -575,44 +576,39 @@ geometry_msgs::msg::PoseStamped VectorPursuitController::getLookAheadPoint(
       return std::hypot(ps.pose.position.x, ps.pose.position.y) >= lookahead_dist;
     });
 
-  geometry_msgs::msg::PoseStamped pose; // pose to return
-  
+  geometry_msgs::msg::PoseStamped pose;  // pose to return
+
   // If no pose is far enough, take the last pose discretely
   if (goal_pose_it == transformed_plan.poses.end()) {
-
-    pose = *(std::prev(transformed_plan.poses.end())); // dereference the last element pointer
+    pose = *(std::prev(transformed_plan.poses.end()));  // dereference the last element pointer
 
     // if heading needs to be computed from path,
     // find the angle of the vector from second last to last pose
     if (!use_heading_from_path_) {
-
       pose.pose.orientation = getOrientation(
         std::prev(std::prev(transformed_plan.poses.end()))->pose.position,
         std::prev(transformed_plan.poses.end())->pose.position);
-    } 
+    }
 
-  // if the first pose is ahead of the lookahead distance, take the first pose discretely
+    // if the first pose is ahead of the lookahead distance, take the first pose discretely
   } else if (goal_pose_it == transformed_plan.poses.begin()) {
-
-    pose = *(goal_pose_it); // dereference the first element pointer
+    pose = *(goal_pose_it);  // dereference the first element pointer
 
     // if heading needs to be computed from path,
     // find the angle of the vector from first to second pose
     if (!use_heading_from_path_) {
-
       pose.pose.orientation = getOrientation(
-        transformed_plan.poses.begin()->pose.position, 
+        transformed_plan.poses.begin()->pose.position,
         std::next(transformed_plan.poses.begin())->pose.position);
     }
 
-  // if interpolation is enabled:
-  // Find the point on the line segment between the two poses
-  // that is exactly the lookahead distance away from the robot pose (the origin)
-  // This can be found with a closed form for the intersection of a segment and a circle
-  // Because of the way we did the std::find_if, prev_pose is guaranteed to be
-  // inside the circle, and goal_pose is guaranteed to be outside the circle.
+    // if interpolation is enabled:
+    // Find the point on the line segment between the two poses
+    // that is exactly the lookahead distance away from the robot pose (the origin)
+    // This can be found with a closed form for the intersection of a segment and a circle
+    // Because of the way we did the std::find_if, prev_pose is guaranteed to be
+    // inside the circle, and goal_pose is guaranteed to be outside the circle.
   } else if (use_interpolation_) {
-    
     auto prev_pose_it = std::prev(goal_pose_it);
 
     pose.pose.position = circleSegmentIntersection(
@@ -625,14 +621,12 @@ geometry_msgs::msg::PoseStamped VectorPursuitController::getLookAheadPoint(
     // if heading needs to be computed from path,
     // find the angle of the vector from prev to goal pose
     if (!use_heading_from_path_) {
-    
       pose.pose.orientation = getOrientation(
         prev_pose_it->pose.position, goal_pose_it->pose.position);
-      
-    // use the headings from the prev and goal poses to interpolate 
-    // a new heading for the lookahead point
-    } else {
 
+      // use the headings from the prev and goal poses to interpolate
+      // a new heading for the lookahead point
+    } else {
       double goal_yaw = getPositiveRadians(tf2::getYaw(goal_pose_it->pose.orientation));
       double prev_yaw = getPositiveRadians(tf2::getYaw(prev_pose_it->pose.orientation));
       double interpolated_yaw = angles::normalize_angle((goal_yaw + prev_yaw) / 2.0);
@@ -640,18 +634,15 @@ geometry_msgs::msg::PoseStamped VectorPursuitController::getLookAheadPoint(
       pose.pose.orientation.y = 0.0;
       pose.pose.orientation.z = sin(interpolated_yaw / 2.0);
       pose.pose.orientation.w = cos(interpolated_yaw / 2.0);
-
     }
-  
-  // if interpolation is disabled just return selected goal pose
-  } else {
 
+    // if interpolation is disabled just return selected goal pose
+  } else {
     pose = *(goal_pose_it);
 
     // if heading needs to be computed from path,
     // find the angle of the vector from second last to last pose
     if (!use_heading_from_path_) {
-
       pose.pose.orientation = getOrientation(
         std::prev(goal_pose_it)->pose.position, goal_pose_it->pose.position);
     }
