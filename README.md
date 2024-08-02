@@ -95,7 +95,7 @@ controller_server:
     
     FollowPath:
       plugin: "vector_pursuit_controller::VectorPursuitController"
-      p_gain: 8.0
+      p_gain: 6.0
       desired_linear_vel: 0.5
       min_turning_radius: 0.2
       lookahead_dist: 0.4

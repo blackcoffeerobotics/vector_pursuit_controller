@@ -210,7 +210,7 @@ protected:
     *    a. Directly from path (discrete)
     *    b. Directly from path (interpolated) (if use_interpolation_ is true)
     *    c. Computed from path (if use_heading_from_path_ is false)
-    * 
+    *
     * Hence the flags use_interpolation_ and use_heading_from_path_
     * play important roles here.
     */
