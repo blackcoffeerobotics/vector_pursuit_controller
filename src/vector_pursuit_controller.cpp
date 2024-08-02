@@ -278,7 +278,7 @@ double VectorPursuitController::calcTurningRadius(
       double phi_1 = std::atan2(
         (2 * std::pow(target_pose.pose.position.y, 2) - std::pow(distance, 2)),
         (2 * target_pose.pose.position.x * target_pose.pose.position.y));
-      double phi_2 = std::atan2((std::pow(distance, 2) / (2 * target_pose.pose.position.y)), 0);
+      double phi_2 = std::atan2(std::pow(distance, 2), (2 * target_pose.pose.position.y));
       double phi = angles::normalize_angle(phi_1 - phi_2);
       double term_1 = (k_ * phi) / (((k_ - 1) * phi) + target_angle);
       double term_2 = std::pow(distance, 2) / (2 * target_pose.pose.position.y);
@@ -675,7 +675,7 @@ bool VectorPursuitController::isCollisionImminent(
   const double & linear_vel, const double & angular_vel,
   const double & target_dist)
 {
-  // Note(stevemacenski): This may be a bit unusual, but the robot_pose is in
+  // This may be a bit unusual, but the robot_pose is in
   // odom frame and the target_pose is in robot base frame.
 
   // check current point is OK

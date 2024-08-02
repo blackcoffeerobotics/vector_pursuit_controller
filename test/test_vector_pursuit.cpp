@@ -47,12 +47,20 @@ public:
 
   double getSpeed() {return desired_linear_vel_;}
 
+  double getMinTurningRadius() {return min_turning_radius_;}
+  void setMinTurningRadius(double r) {min_turning_radius_ = r;}
+
   void setVelocityScaledLookAhead() {use_velocity_scaled_lookahead_dist_ = true;}
   void setCostRegulationScaling() {use_cost_regulated_linear_velocity_scaling_ = true;}
 
   double getLookAheadDistanceWrapper(const geometry_msgs::msg::Twist & twist)
   {
     return getLookAheadDistance(twist);
+  }
+
+  double calcTurningRadiusWrappper(const geometry_msgs::msg::PoseStamped & target_pose)
+  {
+    return calcTurningRadius(target_pose);
   }
 
   static geometry_msgs::msg::Point circleSegmentIntersectionWrapper(
@@ -331,7 +339,22 @@ TEST(VectorPursuitTest, lookaheadAPI)
   pt = ctrl->getLookAheadPointWrapper(dist, path);
   EXPECT_EQ(pt.pose.position.x, 9.0);
 
+  // Test without use heading from path
+  node->set_parameter(
+    rclcpp::Parameter(
+      name + ".use_heading_from_path",
+      rclcpp::ParameterValue(false)));
+  ctrl->configure(node, name, tf, costmap);
+
+  dist = 4.0;
+  pt = ctrl->getLookAheadPointWrapper(dist, path);
+  EXPECT_EQ(pt.pose.position.x, 4.0);
+
   // test interpolation
+  node->set_parameter(
+    rclcpp::Parameter(
+      name + ".use_heading_from_path",
+      rclcpp::ParameterValue(true)));
   node->set_parameter(
     rclcpp::Parameter(
       name + ".use_interpolation",
@@ -340,6 +363,81 @@ TEST(VectorPursuitTest, lookaheadAPI)
   dist = 3.8;
   pt = ctrl->getLookAheadPointWrapper(dist, path);
   EXPECT_EQ(pt.pose.position.x, 3.8);
+
+  // Test without use heading from path with interpolation
+  node->set_parameter(
+    rclcpp::Parameter(
+      name + ".use_heading_from_path",
+      rclcpp::ParameterValue(false)));
+  ctrl->configure(node, name, tf, costmap);
+
+  dist = 3.8;
+  pt = ctrl->getLookAheadPointWrapper(dist, path);
+  EXPECT_EQ(pt.pose.position.x, 3.8);
+
+  // Path not starting at the robot pose
+  for (uint i = 0; i != path.poses.size(); i++) {
+    path.poses[i].pose.position.x = static_cast<double>(i + 1);
+  }
+
+  // if the first pose is ahead of the lookahead distance, take the first pose discretely
+  dist = 0.7;
+  pt = ctrl->getLookAheadPointWrapper(dist, path);
+  EXPECT_EQ(pt.pose.position.x, 1.0);
+
+  // If no pose is far enough, take the last pose discretely
+  dist = 11.0;
+  pt = ctrl->getLookAheadPointWrapper(dist, path);
+  EXPECT_EQ(pt.pose.position.x, 10.0);
+}
+
+TEST(VectorPursuitTest, calcTurnRadius) {
+  auto ctrl = std::make_shared<Controller>();
+  auto node = std::make_shared<rclcpp_lifecycle::LifecycleNode>("testVP");
+  std::string name = "PathFollower";
+  auto tf = std::make_shared<tf2_ros::Buffer>(node->get_clock());
+  auto costmap = std::make_shared<nav2_costmap_2d::Costmap2DROS>("fake_costmap");
+  rclcpp_lifecycle::State state;
+  costmap->on_configure(state);
+  ctrl->configure(node, name, tf, costmap);
+
+  geometry_msgs::msg::PoseStamped carrot;
+
+  // directly ahead
+  carrot.pose.position.x = 0.5;
+  carrot.pose.position.y = 0.0;
+
+  EXPECT_EQ(ctrl->calcTurningRadiusWrappper(carrot), std::numeric_limits<double>::max());
+
+  // directly behind
+  carrot.pose.position.x = -0.5;
+  carrot.pose.position.y = 0.0;
+
+  EXPECT_EQ(ctrl->calcTurningRadiusWrappper(carrot), ctrl->getMinTurningRadius());
+
+  // diagonal
+  carrot.pose.position.x = 0.1;
+  carrot.pose.position.y = 0.1;
+
+  ctrl->setMinTurningRadius(0.0);
+
+  EXPECT_NEAR(ctrl->calcTurningRadiusWrappper(carrot), 0.11, 0.01);
+
+  // beside
+  carrot.pose.position.x = 0.0;
+  carrot.pose.position.y = 0.1;
+
+  EXPECT_NEAR(ctrl->calcTurningRadiusWrappper(carrot), 0.05, 0.01);
+
+  // beside, rotated 90 degrees
+  carrot.pose.position.x = 0.0;
+  carrot.pose.position.y = 0.1;
+
+  tf2::Quaternion tf2_quat;
+  tf2_quat.setRPY(0, 0, -M_PI);
+  carrot.pose.orientation = tf2::toMsg(tf2_quat);
+
+  EXPECT_NEAR(ctrl->calcTurningRadiusWrappper(carrot), 0.04, 0.01);
 }
 
 TEST(VectorPursuitTest, rotateTests)
@@ -507,43 +605,65 @@ TEST(VectorPursuitTest, testDynamicParameter)
     node->get_node_services_interface());
 
   auto results = rec_param->set_parameters_atomically(
-    {rclcpp::Parameter("test.desired_linear_vel", 1.0),
-      rclcpp::Parameter("test.lookahead_dist", 7.0),
-      rclcpp::Parameter("test.max_lookahead_dist", 7.0),
+    {rclcpp::Parameter("test.p_gain", 1.5),
+      rclcpp::Parameter("test.desired_linear_vel", 1.0),
       rclcpp::Parameter("test.min_lookahead_dist", 6.0),
+      rclcpp::Parameter("test.max_lookahead_dist", 7.0),
       rclcpp::Parameter("test.lookahead_time", 1.8),
       rclcpp::Parameter("test.rotate_to_heading_angular_vel", 18.0),
+      rclcpp::Parameter("test.rotate_to_heading_min_angle", 0.7),
       rclcpp::Parameter("test.min_linear_velocity", 1.0),
+      rclcpp::Parameter("test.min_turning_radius", 0.5),
+      rclcpp::Parameter("test.max_angular_accel", 3.0),
+      rclcpp::Parameter("test.max_lateral_accel", 2.0),
+      rclcpp::Parameter("test.max_linear_accel", 2.5),
+      rclcpp::Parameter("test.max_allowed_time_to_collision_up_to_target", 5.0),
+      rclcpp::Parameter("test.approach_velocity_scaling_dist", 10.0),
+      rclcpp::Parameter("test.min_approach_linear_velocity", 0.6),
       rclcpp::Parameter("test.cost_scaling_dist", 2.0),
       rclcpp::Parameter("test.cost_scaling_gain", 4.0),
-      rclcpp::Parameter("test.transform_tolerance", 30.0),
-      rclcpp::Parameter("test.max_angular_accel", 3.0),
-      rclcpp::Parameter("test.rotate_to_heading_min_angle", 0.7),
+      rclcpp::Parameter("test.inflation_cost_scaling_factor", 1.0),
+      rclcpp::Parameter("test.use_collision_detection", true),
       rclcpp::Parameter("test.use_velocity_scaled_lookahead_dist", false),
       rclcpp::Parameter("test.use_cost_regulated_linear_velocity_scaling", false),
-      rclcpp::Parameter("test.use_rotate_to_heading", false)});
+      rclcpp::Parameter("test.use_rotate_to_heading", false),
+      rclcpp::Parameter("test.use_interpolation", true),
+      rclcpp::Parameter("test.use_heading_from_path", false),
+      rclcpp::Parameter("test.allow_reversing", true)});
 
   rclcpp::spin_until_future_complete(
     node->get_node_base_interface(),
     results);
 
+  EXPECT_EQ(node->get_parameter("test.p_gain").as_double(), 1.5);
   EXPECT_EQ(node->get_parameter("test.desired_linear_vel").as_double(), 1.0);
-  EXPECT_EQ(node->get_parameter("test.lookahead_dist").as_double(), 7.0);
-  EXPECT_EQ(node->get_parameter("test.max_lookahead_dist").as_double(), 7.0);
   EXPECT_EQ(node->get_parameter("test.min_lookahead_dist").as_double(), 6.0);
+  EXPECT_EQ(node->get_parameter("test.max_lookahead_dist").as_double(), 7.0);
   EXPECT_EQ(node->get_parameter("test.lookahead_time").as_double(), 1.8);
   EXPECT_EQ(node->get_parameter("test.rotate_to_heading_angular_vel").as_double(), 18.0);
+  EXPECT_EQ(node->get_parameter("test.rotate_to_heading_min_angle").as_double(), 0.7);
   EXPECT_EQ(node->get_parameter("test.min_linear_velocity").as_double(), 1.0);
+  EXPECT_EQ(node->get_parameter("test.min_turning_radius").as_double(), 0.5);
+  EXPECT_EQ(node->get_parameter("test.max_angular_accel").as_double(), 3.0);
+  EXPECT_EQ(node->get_parameter("test.max_lateral_accel").as_double(), 2.0);
+  EXPECT_EQ(node->get_parameter("test.max_linear_accel").as_double(), 2.5);
+  EXPECT_EQ(
+    node->get_parameter(
+      "test.max_allowed_time_to_collision_up_to_target").as_double(), 5.0);
+  EXPECT_EQ(node->get_parameter("test.approach_velocity_scaling_dist").as_double(), 10.0);
+  EXPECT_EQ(node->get_parameter("test.min_approach_linear_velocity").as_double(), 0.6);
   EXPECT_EQ(node->get_parameter("test.cost_scaling_dist").as_double(), 2.0);
   EXPECT_EQ(node->get_parameter("test.cost_scaling_gain").as_double(), 4.0);
-  EXPECT_EQ(node->get_parameter("test.transform_tolerance").as_double(), 30.0);
-  EXPECT_EQ(node->get_parameter("test.max_angular_accel").as_double(), 3.0);
-  EXPECT_EQ(node->get_parameter("test.rotate_to_heading_min_angle").as_double(), 0.7);
+  EXPECT_EQ(node->get_parameter("test.inflation_cost_scaling_factor").as_double(), 1.0);
+  EXPECT_EQ(node->get_parameter("test.use_collision_detection").as_bool(), true);
   EXPECT_EQ(node->get_parameter("test.use_velocity_scaled_lookahead_dist").as_bool(), false);
   EXPECT_EQ(
     node->get_parameter(
       "test.use_cost_regulated_linear_velocity_scaling").as_bool(), false);
   EXPECT_EQ(node->get_parameter("test.use_rotate_to_heading").as_bool(), false);
+  EXPECT_EQ(node->get_parameter("test.use_interpolation").as_bool(), true);
+  EXPECT_EQ(node->get_parameter("test.use_heading_from_path").as_bool(), false);
+  EXPECT_EQ(node->get_parameter("test.allow_reversing").as_bool(), true);
 }
 
 class TransformGlobalPlanTest : public ::testing::Test
@@ -929,12 +1049,15 @@ protected:
     costmap_->on_configure(state);
   }
 
-  void configure_controller(double max_robot_pose_search_dist)
+  void configure_controller(double max_robot_pose_search_dist, bool allow_reversing)
   {
     std::string plugin_name = "test_vp";
     nav2_util::declare_parameter_if_not_declared(
       node_, plugin_name + ".max_robot_pose_search_dist",
       rclcpp::ParameterValue(max_robot_pose_search_dist));
+    nav2_util::declare_parameter_if_not_declared(
+      node_, plugin_name + ".allow_reversing",
+      rclcpp::ParameterValue(allow_reversing));
     ctrl_->configure(node_, plugin_name, tf_buffer_, costmap_);
   }
 
@@ -985,7 +1108,7 @@ protected:
   rclcpp::Time transform_time_;
 };
 
-TEST_F(ComputeVelocityCommandsTest, straightLine)
+TEST_F(ComputeVelocityCommandsTest, straightLineForward)
 {
   geometry_msgs::msg::PoseStamped robot_pose;
   robot_pose.header.frame_id = COSTMAP_FRAME;
@@ -998,28 +1121,19 @@ TEST_F(ComputeVelocityCommandsTest, straightLine)
   setup_transforms(robot_pose.pose.position);
   configure_costmap(50u, 0.1);
   constexpr double max_robot_pose_search_dist = 10.0;
-  configure_controller(max_robot_pose_search_dist);
+  configure_controller(max_robot_pose_search_dist, false);
 
   // Set a plan in a straight line from the robot
   nav_msgs::msg::Path path;
   path.header.frame_id = PATH_FRAME;
   path.header.stamp = transform_time_;
-  path.poses.resize(3);
-  path.poses[0].header.frame_id = PATH_FRAME;
-  path.poses[0].header.stamp = transform_time_;
-  path.poses[0].pose.position.x = 1.0;
-  path.poses[0].pose.position.y = 1.0;
-  path.poses[0].pose.orientation = tf2::toMsg(tf2::Quaternion(0.0, 0.0, 0.0, 1.0));
-  path.poses[1].header.frame_id = PATH_FRAME;
-  path.poses[1].header.stamp = transform_time_;
-  path.poses[1].pose.position.x = 2.0;
-  path.poses[1].pose.position.y = 1.0;
-  path.poses[1].pose.orientation = tf2::toMsg(tf2::Quaternion(0.0, 0.0, 0.0, 1.0));
-  path.poses[2].header.frame_id = PATH_FRAME;
-  path.poses[2].header.stamp = transform_time_;
-  path.poses[2].pose.position.x = 3.0;
-  path.poses[2].pose.position.y = 1.0;
-  path.poses[2].pose.orientation = tf2::toMsg(tf2::Quaternion(0.0, 0.0, 0.0, 1.0));
+  path.poses.resize(10);
+  for (uint i = 0; i != path.poses.size(); i++) {
+    path.poses[i].header.frame_id = PATH_FRAME;
+    path.poses[i].header.stamp = transform_time_;
+    path.poses[i].pose.position.y = 1.0;
+    path.poses[i].pose.position.x = static_cast<double>(i);
+  }
 
   ctrl_->setPlan(path);
   ctrl_->activate();
@@ -1031,5 +1145,85 @@ TEST_F(ComputeVelocityCommandsTest, straightLine)
 
   auto cmd_vel = ctrl_->computeVelocityCommandsWrapper(robot_pose, robot_velocity, &checker_);
   EXPECT_EQ(cmd_vel.twist.linear.x, 0.1);
-  EXPECT_NEAR(cmd_vel.twist.angular.z, 0.0, 0.1);
+  EXPECT_NEAR(cmd_vel.twist.angular.z, 0.0, 0.01);
+}
+
+TEST_F(ComputeVelocityCommandsTest, straightLineBackward)
+{
+  geometry_msgs::msg::PoseStamped robot_pose;
+  robot_pose.header.frame_id = COSTMAP_FRAME;
+  robot_pose.header.stamp = transform_time_;
+  robot_pose.pose.position.x = 25.0;
+  robot_pose.pose.position.y = 25.0;
+  robot_pose.pose.position.z = 0.0;
+
+  // setup
+  setup_transforms(robot_pose.pose.position);
+  configure_costmap(50u, 0.1);
+  constexpr double max_robot_pose_search_dist = 10.0;
+  configure_controller(max_robot_pose_search_dist, true);
+
+  // Set a plan in a straight line from the robot
+  nav_msgs::msg::Path path;
+  path.header.frame_id = PATH_FRAME;
+  path.header.stamp = transform_time_;
+  path.poses.resize(10);
+  for (uint i = 0; i != path.poses.size(); i++) {
+    path.poses[i].header.frame_id = PATH_FRAME;
+    path.poses[i].header.stamp = transform_time_;
+    path.poses[i].pose.position.y = 25.0;
+    path.poses[i].pose.position.x = static_cast<double>(25 - i);
+  }
+
+  ctrl_->setPlan(path);
+  ctrl_->activate();
+
+  // Set velocity
+  geometry_msgs::msg::Twist robot_velocity;
+  robot_velocity.linear.x = 0.0;
+  robot_velocity.angular.z = 0.0;
+
+  auto cmd_vel = ctrl_->computeVelocityCommandsWrapper(robot_pose, robot_velocity, &checker_);
+  EXPECT_EQ(cmd_vel.twist.linear.x, -0.1);
+  EXPECT_NEAR(cmd_vel.twist.angular.z, 0.0, 0.01);
+}
+
+TEST_F(ComputeVelocityCommandsTest, rotateToHeading)
+{
+  geometry_msgs::msg::PoseStamped robot_pose;
+  robot_pose.header.frame_id = COSTMAP_FRAME;
+  robot_pose.header.stamp = transform_time_;
+  robot_pose.pose.position.x = 25.0;
+  robot_pose.pose.position.y = 25.0;
+  robot_pose.pose.position.z = 0.0;
+
+  // setup
+  setup_transforms(robot_pose.pose.position);
+  configure_costmap(50u, 0.1);
+  constexpr double max_robot_pose_search_dist = 10.0;
+  configure_controller(max_robot_pose_search_dist, false);
+
+  // Set a plan in a straight line from the robot
+  nav_msgs::msg::Path path;
+  path.header.frame_id = PATH_FRAME;
+  path.header.stamp = transform_time_;
+  path.poses.resize(10);
+  for (uint i = 0; i != path.poses.size(); i++) {
+    path.poses[i].header.frame_id = PATH_FRAME;
+    path.poses[i].header.stamp = transform_time_;
+    path.poses[i].pose.position.y = static_cast<double>(30 + i);
+    path.poses[i].pose.position.x = static_cast<double>(25 + i);
+  }
+
+  ctrl_->setPlan(path);
+  ctrl_->activate();
+
+  // Set velocity
+  geometry_msgs::msg::Twist robot_velocity;
+  robot_velocity.linear.x = 0.0;
+  robot_velocity.angular.z = 0.0;
+
+  auto cmd_vel = ctrl_->computeVelocityCommandsWrapper(robot_pose, robot_velocity, &checker_);
+  EXPECT_EQ(cmd_vel.twist.linear.x, 0.0);
+  EXPECT_NEAR(cmd_vel.twist.angular.z, 0.16, 0.01);
 }
