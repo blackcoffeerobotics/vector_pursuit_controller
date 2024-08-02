@@ -2,9 +2,9 @@
 
 # Vector Pursuit Controller
 
-This [ROS2 Humble](https://docs.ros.org/en/humble/index.html) package contains a plugin for the [Nav2 Controller Server](https://docs.nav2.org/configuration/packages/configuring-controller-server.html) that implements the [Vector Pursuit](https://apps.dtic.mil/sti/pdfs/ADA468928.pdf) path tracking algorithm. It leverages [Screw Theory](https://en.wikipedia.org/wiki/Screw_theory) to achieve **accurate path tracking** and comes with **active collision detection**. The controller has a **very low computational overhead** and is very easy and **simple to deploy**. It tracks path orientation in a geometrically-meaningful way making it an ideal replacement for the [Pure Pursuit Algorithm](https://in.mathworks.com/help/nav/ug/pure-pursuit-controller.html) in scenarios where path following accuracy is vital. It consumes 15% of a single core on an ARM cortex-A72 CPU @ 1.8Hz and is designed to track paths at speeds upto 4.5m/s. 
+This [ROS2 Humble](https://docs.ros.org/en/humble/index.html) package contains a plugin for the [Nav2 Controller Server](https://docs.nav2.org/configuration/packages/configuring-controller-server.html) that implements the [Vector Pursuit](https://apps.dtic.mil/sti/pdfs/ADA468928.pdf) path tracking algorithm. It leverages [Screw Theory](https://en.wikipedia.org/wiki/Screw_theory) to achieve **accurate path tracking** and comes with **active collision detection**. The controller has a **very low computational overhead** and is very easy and **simple to deploy**. It tracks path orientation in a geometrically-meaningful way making it an ideal replacement for the [Pure Pursuit Algorithm](https://in.mathworks.com/help/nav/ug/pure-pursuit-controller.html) in scenarios where path following accuracy is vital. It consumes 15% of a single core on an ARM cortex-A72 CPU @ 1.8GHz and is designed to track paths at speeds upto 4.5m/s. 
 
-[linkedin Post Video]()
+https://github.com/user-attachments/assets/5a660fa0-054c-4b14-aecd-d9cfe471930b
 
 ## Get Started
 These are minimal, to-the-point instructions for experienced ROS2/Nav2 users. Beginners are recommended to read [Effective and Efficient Mobile Robot Control with Vector Pursuit and ROS2]*() for a simple 5-step example to try out the controller in a Gazebo  simulation.
