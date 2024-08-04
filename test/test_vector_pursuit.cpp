@@ -607,13 +607,15 @@ TEST(VectorPursuitTest, testDynamicParameter)
   auto results = rec_param->set_parameters_atomically(
     {rclcpp::Parameter("test.p_gain", 1.5),
       rclcpp::Parameter("test.desired_linear_vel", 1.0),
+      rclcpp::Parameter("test.transform_tolerance", 0.5),
+      rclcpp::Parameter("test.lookahead_dist", 1.0),
       rclcpp::Parameter("test.min_lookahead_dist", 6.0),
       rclcpp::Parameter("test.max_lookahead_dist", 7.0),
       rclcpp::Parameter("test.lookahead_time", 1.8),
       rclcpp::Parameter("test.rotate_to_heading_angular_vel", 18.0),
       rclcpp::Parameter("test.rotate_to_heading_min_angle", 0.7),
       rclcpp::Parameter("test.min_linear_velocity", 1.0),
-      rclcpp::Parameter("test.min_turning_radius", 0.5),
+      rclcpp::Parameter("test.min_turning_radius", 0.0),
       rclcpp::Parameter("test.max_angular_accel", 3.0),
       rclcpp::Parameter("test.max_lateral_accel", 2.0),
       rclcpp::Parameter("test.max_linear_accel", 2.5),
@@ -622,6 +624,7 @@ TEST(VectorPursuitTest, testDynamicParameter)
       rclcpp::Parameter("test.min_approach_linear_velocity", 0.6),
       rclcpp::Parameter("test.cost_scaling_dist", 2.0),
       rclcpp::Parameter("test.cost_scaling_gain", 4.0),
+      rclcpp::Parameter("test.inflation_cost_scaling_factor", -1.0),
       rclcpp::Parameter("test.inflation_cost_scaling_factor", 1.0),
       rclcpp::Parameter("test.use_collision_detection", true),
       rclcpp::Parameter("test.use_velocity_scaled_lookahead_dist", false),
@@ -637,13 +640,15 @@ TEST(VectorPursuitTest, testDynamicParameter)
 
   EXPECT_EQ(node->get_parameter("test.p_gain").as_double(), 1.5);
   EXPECT_EQ(node->get_parameter("test.desired_linear_vel").as_double(), 1.0);
+  EXPECT_EQ(node->get_parameter("test.transform_tolerance").as_double(), 0.5);
+  EXPECT_EQ(node->get_parameter("test.lookahead_dist").as_double(), 1.0);
   EXPECT_EQ(node->get_parameter("test.min_lookahead_dist").as_double(), 6.0);
   EXPECT_EQ(node->get_parameter("test.max_lookahead_dist").as_double(), 7.0);
   EXPECT_EQ(node->get_parameter("test.lookahead_time").as_double(), 1.8);
   EXPECT_EQ(node->get_parameter("test.rotate_to_heading_angular_vel").as_double(), 18.0);
   EXPECT_EQ(node->get_parameter("test.rotate_to_heading_min_angle").as_double(), 0.7);
   EXPECT_EQ(node->get_parameter("test.min_linear_velocity").as_double(), 1.0);
-  EXPECT_EQ(node->get_parameter("test.min_turning_radius").as_double(), 0.5);
+  EXPECT_EQ(node->get_parameter("test.min_turning_radius").as_double(), 0.0);
   EXPECT_EQ(node->get_parameter("test.max_angular_accel").as_double(), 3.0);
   EXPECT_EQ(node->get_parameter("test.max_lateral_accel").as_double(), 2.0);
   EXPECT_EQ(node->get_parameter("test.max_linear_accel").as_double(), 2.5);
