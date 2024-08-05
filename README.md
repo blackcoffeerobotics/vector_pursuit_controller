@@ -1,4 +1,4 @@
-[![Code Coverage](https://img.shields.io/badge/code%20coverage-93.9%25-darkgreen.svg)](./code_coverage_report.info)
+[![Line Coverage](https://img.shields.io/badge/Line%20Coverage-90.1%25-darkgreen.svg)](./code_coverage_report.info) [![Function Coverage](https://img.shields.io/badge/Function%20Coverage-97.0%25-darkgreen.svg)](./code_coverage_report.info)
 
 # Vector Pursuit Controller
 
@@ -7,7 +7,7 @@ This [ROS2 Humble](https://docs.ros.org/en/humble/index.html) package contains a
 https://github.com/user-attachments/assets/5a660fa0-054c-4b14-aecd-d9cfe471930b
 
 ## Get Started
-These are minimal, to-the-point instructions for experienced ROS2/Nav2 users. Beginners are recommended to read [Effective and Efficient Mobile Robot Control with Vector Pursuit and ROS2]*() for a simple 5-step example to try out the controller in a Gazebo  simulation.
+These are minimal, to-the-point instructions for experienced ROS2/Nav2 users. Beginners are recommended to read the [Quickstart Tutorial](#quickstart-tutorial) for a simple 5-step example to try out the controller in a Gazebo simulation.
 
 1. Clone the repo into a ROS2 colcon workspace.
     ```bash
@@ -126,6 +126,46 @@ controller_server:
       approach_velocity_scaling_dist: 1.0
       min_approach_linear_velocity: 5.0
 ```
+
+## Quickstart Tutorial
+We require a robot running the Nav2 stack to use the Vector Pursuit Controller. This example will utilise [BCR Bot](https://github.com/blackcoffeerobotics/bcr_bot), a simulated differential drive robot with a pre-configured Nav2 stack. An installation of [ROS2 Humble](https://docs.ros.org/en/humble/Installation.html) is needed along with [Git](https://git-scm.com/downloads) on an Ubuntu Machine.
+
+1. Create a ROS2 workspace and clone the repositories into this workspace.
+	```bash
+	mkdir -p ~/ros2_ws/src && cd ~/ros2_ws/src
+    
+	git clone https://github.com/blackcoffeerobotics/vector_pursuit_controller.git
+	git clone https://github.com/blackcoffeerobotics/bcr_bot.git
+
+	# install package dependencies
+	cd ~/ros2_ws && rosdep install --from-paths src --ignore-src -r -y
+	```
+
+2. Install other ROS2 dependencies required for this tutorial.
+	```bash
+
+	# fortress
+	sudo apt-get install ros-humble-ros-gz-sim ros-humble-ros-gz-bridge ros-humble-ros-gz-interfaces
+
+	# nav2
+	sudo apt-get install ros-humble-navigation2 ros-humble-nav2-bringup
+	```
+
+3. Edit the [nav2_params.yaml](https://github.com/blackcoffeerobotics/bcr_bot/blob/ros2/config/nav2_params.yaml) file in the bcr_bot repository to replace `controller_server` parameters, copy these parameters from the [default parameters](#default-parameters) section.
+
+4. Build the workspace and source it.
+	```bash
+	cd ~/ros2_ws && colcon build && source install/setup.bash
+	```
+
+5. Run the nodes in two different terminals.
+	```bash
+	# in terminal 1
+	ros2 launch bcr_bot ign.launch.py
+
+	# in terminal 2, make sure to source the workspace
+	ros2 launch bcr_bot nav2.launch.py
+	```
 
 ## Vector Pursuit Algorithm
 
