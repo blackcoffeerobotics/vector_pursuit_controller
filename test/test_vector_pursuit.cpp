@@ -605,7 +605,7 @@ TEST(VectorPursuitTest, testDynamicParameter)
     node->get_node_services_interface());
 
   auto results = rec_param->set_parameters_atomically(
-    {rclcpp::Parameter("test.p_gain", 1.5),
+    {rclcpp::Parameter("test.k", 1.5),
       rclcpp::Parameter("test.desired_linear_vel", 1.0),
       rclcpp::Parameter("test.transform_tolerance", 0.5),
       rclcpp::Parameter("test.lookahead_dist", 1.0),
@@ -638,7 +638,7 @@ TEST(VectorPursuitTest, testDynamicParameter)
     node->get_node_base_interface(),
     results);
 
-  EXPECT_EQ(node->get_parameter("test.p_gain").as_double(), 1.5);
+  EXPECT_EQ(node->get_parameter("test.k").as_double(), 1.5);
   EXPECT_EQ(node->get_parameter("test.desired_linear_vel").as_double(), 1.0);
   EXPECT_EQ(node->get_parameter("test.transform_tolerance").as_double(), 0.5);
   EXPECT_EQ(node->get_parameter("test.lookahead_dist").as_double(), 1.0);

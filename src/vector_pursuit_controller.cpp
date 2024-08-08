@@ -55,7 +55,7 @@ void VectorPursuitController::configure(
   goal_dist_tol_ = 0.25;  // reasonable default before first update
 
   declare_parameter_if_not_declared(
-    node, plugin_name_ + ".p_gain", rclcpp::ParameterValue(8.0));
+    node, plugin_name_ + ".k", rclcpp::ParameterValue(8.0));
   declare_parameter_if_not_declared(
     node, plugin_name_ + ".desired_linear_vel", rclcpp::ParameterValue(0.5));
   declare_parameter_if_not_declared(
@@ -121,7 +121,7 @@ void VectorPursuitController::configure(
     node, plugin_name_ + ".use_heading_from_path",
     rclcpp::ParameterValue(true));
 
-  node->get_parameter(plugin_name_ + ".p_gain", k_);
+  node->get_parameter(plugin_name_ + ".k", k_);
   node->get_parameter(plugin_name_ + ".desired_linear_vel", desired_linear_vel_);
   base_desired_linear_vel_ = desired_linear_vel_;
   node->get_parameter(plugin_name_ + ".min_turning_radius", min_turning_radius_);
@@ -989,7 +989,7 @@ rcl_interfaces::msg::SetParametersResult VectorPursuitController::dynamicParamet
         max_angular_accel_ = parameter.as_double();
       } else if (name == plugin_name_ + ".rotate_to_heading_min_angle") {
         rotate_to_heading_min_angle_ = parameter.as_double();
-      } else if (name == plugin_name_ + ".p_gain") {
+      } else if (name == plugin_name_ + ".k") {
         k_ = parameter.as_double();
       } else if (name == plugin_name_ + ".approach_velocity_scaling_dist") {
         approach_velocity_scaling_dist_ = parameter.as_double();
