@@ -256,6 +256,7 @@ double VectorPursuitController::getLookAheadDistance(
 {
   // If using velocity-scaled look ahead distances, find and clamp the dist
   // Else, use the static look ahead distance
+  // TODO: verify that the speed variable is correctly set
   double lookahead_dist = lookahead_dist_;
   if (use_velocity_scaled_lookahead_dist_) {
     lookahead_dist = std::abs(speed.linear.x) * lookahead_time_;
