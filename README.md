@@ -171,3 +171,10 @@ To generate an HTML webpage to view code coverage use:
 ```bash
 genhtml code_coverage_report.info --output-directory ~/vector_pursuit_code_coverage_report
 ```
+
+## Acknowledgements
+
+We acknowledge the contributions of:
+
+1. The author of [Vector Pursuit Path Tracking for Autonomous Ground Vehicles](https://apps.dtic.mil/sti/pdfs/ADA468928.pdf), Jeffrey S. Wit.
+2. The [Nav2 Regulated Pure Pursuit Controller project](https://github.com/ros-navigation/navigation2/tree/main/nav2_regulated_pure_pursuit_controller).  
