@@ -2,8 +2,8 @@
 Changelog for package vector_pursuit_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.1 (2024-09-03)
+------------------
 * Fixed liniting issues
 * package manifest updated
 * updated readme
