@@ -1,40 +1,30 @@
 <?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
-<package format="3">
+<package format="2">
   <name>vector_pursuit_controller</name>
-  <version>1.0.1</version>
-  <description>Vector Pursuit Controller</description>
-  <maintainer email="kostubh@blackcoffeerobotics.com">Kostubh Khandelwal</maintainer>
-  <maintainer email="gaurav@blackcoffeerobotics.com">Gaurav Gupta</maintainer>
-  <maintainer email="arthur@blackcoffeerobotics.com">Arthur Gomes</maintainer>
-  <license>Apache-2.0</license>
+  <version>0.0.0</version>
+  <description>The vector_pursuit_controller package</description>
+  <maintainer email="amr@todo.todo">amr</maintainer>
+  <license>TODO</license>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>rclcpp</depend>
-  <depend>nav2_common</depend>
-  <depend>nav2_core</depend>
-  <depend>nav2_util</depend>
-  <depend>nav2_costmap_2d</depend>
+  <build_depend>tf2_geometry_msgs</build_depend>
+
+  <exec_depend>tf2_geometry_msgs</exec_depend>
+  
+  <depend>base_local_planner</depend>
+  <depend>costmap_2d</depend>
+  <depend>angles</depend>
   <depend>geometry_msgs</depend>
-  <depend>nav2_msgs</depend>
+  <depend>nav_core</depend>
+  <depend>nav_msgs</depend>
   <depend>pluginlib</depend>
+  <depend>roscpp</depend>
   <depend>tf2</depend>
-  <depend>tf2_geometry_msgs</depend>
   <depend>tf2_ros</depend>
-
-  <test_depend>ament_cmake_gtest</test_depend>
-  <test_depend>ament_lint_common</test_depend>
-  <test_depend>ament_lint_auto</test_depend>
-  <test_depend>nav2_controller</test_depend>
-  <test_depend>nav2_costmap_2d</test_depend>
-  <test_depend>nav2_util</test_depend>
-  <test_depend>nav2_core</test_depend>
-  <test_depend>nav_msgs</test_depend>
+  <depend>dynamic_reconfigure</depend>
 
   <export>
-    <build_type>ament_cmake</build_type>
-    <nav2_core plugin="${prefix}/vector_pursuit_controller.xml" />
+    <nav_core plugin="${prefix}/vector_pursuit_controller.xml"/>
   </export>
-
 </package>
