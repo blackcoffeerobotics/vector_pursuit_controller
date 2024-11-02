@@ -1,9 +1,10 @@
-<class_libraries>
-    <library path="vector_pursuit_controller">
-        <class type="vector_pursuit_controller::VectorPursuitController" base_class_type="nav2_core::Controller">
-            <description>
-                vector_pursuit_controller
-            </description>
-        </class>
-    </library>
-</class_libraries>
+<library path="lib/libvector_pursuit_controller">
+	<class name="vector_pursuit_controller/VectorPursuitController"
+           type="vector_pursuit_controller::VectorPursuitController"
+           base_class_type="nav_core::BaseLocalPlanner">
+		<description>
+			The vector_pursuit_controller package implements a plugin
+			to the base_local_planner of the 2D navigation stack.
+		</description>
+	</class>
+</library>
