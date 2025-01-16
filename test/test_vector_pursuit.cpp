@@ -27,7 +27,7 @@
 #include "vector_pursuit_controller/vector_pursuit_controller.hpp"
 #include "nav2_controller/plugins/simple_goal_checker.hpp"
 #include "nav2_costmap_2d/costmap_filters/filter_values.hpp"
-#include "nav2_core/exceptions.hpp"
+#include "nav2_core/planner_exceptions.hpp"
 #include "nav2_costmap_2d/footprint.hpp"
 
 class RclCppFixture

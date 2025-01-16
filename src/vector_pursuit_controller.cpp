@@ -24,7 +24,7 @@
 
 #include "vector_pursuit_controller/vector_pursuit_controller.hpp"
 #include "angles/angles.h"
-#include "nav2_core/exceptions.hpp"
+#include "nav2_core/planner_exceptions.hpp"
 #include "nav2_util/node_utils.hpp"
 #include "nav2_costmap_2d/costmap_filters/filter_values.hpp"
 
@@ -880,8 +880,8 @@ nav_msgs::msg::Path VectorPursuitController::transformGlobalPlan(
   // Find points up to max_transform_dist so we only transform them.
   auto transformation_end = std::find_if(
     transformation_begin, global_plan_.poses.end(),
-    [&](const auto & pose) {
-      return euclidean_distance(pose, robot_pose) > max_costmap_extent;
+    [&](const auto & plan_pose) {
+      return euclidean_distance(plan_pose, robot_pose) > max_costmap_extent;
     });
 
   // Lambda to transform a PoseStamped from global frame to local
