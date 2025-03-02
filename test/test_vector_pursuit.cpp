@@ -424,13 +424,13 @@ TEST(VectorPursuitTest, calcTurnRadius) {
 
   EXPECT_NEAR(ctrl->calcTurningRadiusWrappper(carrot), 0.11, 0.01);
 
-  // beside
+  // left
   carrot.pose.position.x = 0.0;
   carrot.pose.position.y = 0.1;
 
   EXPECT_NEAR(ctrl->calcTurningRadiusWrappper(carrot), 0.05, 0.01);
 
-  // beside, rotated 90 degrees
+  // left, rotated 180 degrees
   carrot.pose.position.x = 0.0;
   carrot.pose.position.y = 0.1;
 
@@ -438,7 +438,7 @@ TEST(VectorPursuitTest, calcTurnRadius) {
   tf2_quat.setRPY(0, 0, -M_PI);
   carrot.pose.orientation = tf2::toMsg(tf2_quat);
 
-  EXPECT_NEAR(ctrl->calcTurningRadiusWrappper(carrot), 0.04, 0.01);
+  EXPECT_NEAR(ctrl->calcTurningRadiusWrappper(carrot), 0.0, 0.01);
 }
 
 TEST(VectorPursuitTest, rotateTests)

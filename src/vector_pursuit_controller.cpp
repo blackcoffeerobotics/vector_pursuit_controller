@@ -281,10 +281,11 @@ double VectorPursuitController::calcTurningRadius(
       double phi_1 = std::atan2(
         (2 * std::pow(target_pose.pose.position.y, 2) - std::pow(distance, 2)),
         (2 * target_pose.pose.position.x * target_pose.pose.position.y));
-      double phi_2 = std::atan2(std::pow(distance, 2), (2 * target_pose.pose.position.y));
-      double phi = angles::normalize_angle(phi_1 - phi_2);
-      double term_1 = (k_ * phi) / (((k_ - 1) * phi) + target_angle);
       double term_2 = std::pow(distance, 2) / (2 * target_pose.pose.position.y);
+      double phi_2 = std::atan2(term_2, 0.0);
+      double phi = angles::normalize_angle_positive(phi_1 - phi_2);
+      phi = std::max(phi, 1.0e-9);
+      double term_1 = (k_ * phi) / (((k_ - 1) * phi) + target_angle);
       turning_radius = std::abs(term_1 * term_2);
     } else {
       // Handle case when target is directly ahead
