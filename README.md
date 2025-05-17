@@ -2,7 +2,7 @@
 
 # Vector Pursuit Controller
 
-This [ROS2 Humble](https://docs.ros.org/en/humble/index.html) package contains a plugin for the [Nav2 Controller Server](https://docs.nav2.org/configuration/packages/configuring-controller-server.html) that implements the [Vector Pursuit](https://apps.dtic.mil/sti/pdfs/ADA468928.pdf) path tracking algorithm. It leverages [Screw Theory](https://en.wikipedia.org/wiki/Screw_theory) to achieve **accurate path tracking** and comes with **active collision detection**. The controller has a **very low computational overhead** and is very easy and **simple to deploy**. It tracks path orientation in a geometrically-meaningful way making it an ideal replacement for the [Pure Pursuit Algorithm](https://in.mathworks.com/help/nav/ug/pure-pursuit-controller.html) in scenarios where path following accuracy is vital. It consumes 15% of a single core on an ARM cortex-A72 CPU @ 1.8GHz and is designed to track paths at speeds upto 4.5m/s. 
+This [ROS2 Jazzy](https://docs.ros.org/en/jazzy/index.html) package contains a plugin for the [Nav2 Controller Server](https://docs.nav2.org/configuration/packages/configuring-controller-server.html) that implements the [Vector Pursuit](https://apps.dtic.mil/sti/pdfs/ADA468928.pdf) path tracking algorithm. It leverages [Screw Theory](https://en.wikipedia.org/wiki/Screw_theory) to achieve **accurate path tracking** and comes with **active collision detection**. The controller has a **very low computational overhead** and is very easy and **simple to deploy**. It tracks path orientation in a geometrically-meaningful way making it an ideal replacement for the [Pure Pursuit Algorithm](https://in.mathworks.com/help/nav/ug/pure-pursuit-controller.html) in scenarios where path following accuracy is vital. It consumes 15% of a single core on an ARM cortex-A72 CPU @ 1.8GHz and is designed to track paths at speeds upto 4.5m/s. 
 
 https://github.com/user-attachments/assets/5a660fa0-054c-4b14-aecd-d9cfe471930b
 
@@ -11,7 +11,7 @@ These are minimal, to-the-point instructions for experienced ROS2/Nav2 users. Be
 
 1. Install the package binaries.
     ```bash
-    sudo apt-get install ros-humble-vector-pursuit-controller
+    sudo apt-get install ros-jazzy-vector-pursuit-controller
     ```
 
 2. Edit the `controller_server` parameters of the Nav2 stack to include the vector pursuit plugin along with its [default configuration](#default-parameters). Nav2's controller server supports multiple controller plugins at the same time and instructions for setting it up can be found in the [official docs](https://docs.nav2.org/configuration/packages/configuring-controller-server.html).
@@ -128,16 +128,16 @@ controller_server:
 ```
 
 ## Quickstart Tutorial
-We require a robot running the Nav2 stack to use the Vector Pursuit Controller. This example will utilise [BCR Bot](https://github.com/blackcoffeerobotics/bcr_bot), a simulated, differential-drive robot with a sample Nav2 stack. An installation of [ROS2 Humble](https://docs.ros.org/en/humble/Installation.html) is needed along with [Git](https://git-scm.com/downloads) on an Ubuntu Machine.
+We require a robot running the Nav2 stack to use the Vector Pursuit Controller. This example will utilise [BCR Bot](https://github.com/blackcoffeerobotics/bcr_bot), a simulated, differential-drive robot with a sample Nav2 stack. An installation of [ROS2 Jazzy](https://docs.ros.org/en/jazzy/Installation.html) is needed along with [Git](https://git-scm.com/downloads) on an Ubuntu Machine.
 
 1. Install the package binaries.
     ```bash
-    sudo apt-get install ros-humble-vector-pursuit-controller
+    sudo apt-get install ros-jazzy-vector-pursuit-controller
     ```
 
 2. Install other ROS2 dependencies required for this tutorial.
 	```bash
-	sudo apt-get install -y ros-humble-ros-gz-sim ros-humble-ros-gz-bridge ros-humble-ros-gz-interfaces ros-humble-bcr-bot ros-humble-navigation2 ros-humble-nav2-bringup  
+	sudo apt-get install -y ros-jazzy-ros-gz-sim ros-jazzy-ros-gz-bridge ros-jazzy-ros-gz-interfaces ros-jazzy-bcr-bot ros-jazzy-navigation2 ros-jazzy-nav2-bringup  
 	```
 
 3. Run the ROS2 demo launch file.

@@ -42,7 +42,7 @@ def generate_launch_description():
         name='behavior_server',
         output='screen',
         parameters=[params_file],
-        remappings=remappings)
+        remappings=remappings + [('cmd_vel', 'bcr_bot/cmd_vel')])
 
     bt_navigator = Node(
         package='nav2_bt_navigator',
@@ -80,6 +80,15 @@ def generate_launch_description():
         parameters=[{'yaml_filename': os.path.join(pkg_vp, 'config', 'bcr_map.yaml')}],
     )
 
+    smoother_server = Node(
+        package='nav2_smoother',
+        executable='smoother_server',
+        name='smoother_server',
+        output='screen',
+        parameters=[params_file],
+        remappings=remappings,
+    )
+
     static_transform_publisher_node = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
@@ -97,5 +106,6 @@ def generate_launch_description():
         lifecycle_manager,
         rviz_launch_cmd,
         map_server_node,
+        smoother_server,
         static_transform_publisher_node
     ])
