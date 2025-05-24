@@ -2,7 +2,7 @@
 Changelog for package vector_pursuit_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
+1.1.0 (2025-05-25)
 -----------
 * Added jazzy compliant params and launch file
 * Fix include paths to comply with nav2 jazzy, improve variable naming in controller and fix linting issues
