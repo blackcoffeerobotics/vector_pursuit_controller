@@ -2,6 +2,13 @@
 Changelog for package vector_pursuit_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Added jazzy compliant params and launch file
+* Fix include paths to comply with nav2 jazzy, improve variable naming in controller and fix linting issues
+* Update install binary (`#3 <https://github.com/blackcoffeerobotics/vector_pursuit_controller/issues/3>`_)
+* Contributors: Kostubh Khandelwal(exMachina316)
+
 1.0.1 (2024-09-03)
 ------------------
 * Fixed liniting issues
