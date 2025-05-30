@@ -1055,7 +1055,11 @@ protected:
     costmap_->on_configure(state);
   }
 
-  void configure_controller(double max_robot_pose_search_dist, bool allow_reversing)
+  void configure_controller(
+    double max_robot_pose_search_dist,
+    bool allow_reversing,
+    bool use_rotate_to_heading = true,
+    double min_turning_radius = 1.0)
   {
     std::string plugin_name = "test_vp";
     nav2_util::declare_parameter_if_not_declared(
@@ -1064,6 +1068,12 @@ protected:
     nav2_util::declare_parameter_if_not_declared(
       node_, plugin_name + ".allow_reversing",
       rclcpp::ParameterValue(allow_reversing));
+    nav2_util::declare_parameter_if_not_declared(
+      node_, plugin_name + ".use_rotate_to_heading",
+      rclcpp::ParameterValue(use_rotate_to_heading));
+    nav2_util::declare_parameter_if_not_declared(
+      node_, plugin_name + ".min_turning_radius",
+      rclcpp::ParameterValue(min_turning_radius));
     ctrl_->configure(node_, plugin_name, tf_buffer_, costmap_);
   }
 
@@ -1232,4 +1242,47 @@ TEST_F(ComputeVelocityCommandsTest, rotateToHeading)
   auto cmd_vel = ctrl_->computeVelocityCommandsWrapper(robot_pose, robot_velocity, &checker_);
   EXPECT_EQ(cmd_vel.twist.linear.x, 0.0);
   EXPECT_NEAR(cmd_vel.twist.angular.z, 0.16, 0.01);
+}
+
+TEST_F(ComputeVelocityCommandsTest, ackermannConstraints)
+{
+  geometry_msgs::msg::PoseStamped robot_pose;
+  robot_pose.header.frame_id = COSTMAP_FRAME;
+  robot_pose.header.stamp = transform_time_;
+  robot_pose.pose.position.x = 25.0;
+  robot_pose.pose.position.y = 25.0;
+  robot_pose.pose.position.z = 0.0;
+
+  double min_tunring_radius = 2.2;
+
+  // setup
+  setup_transforms(robot_pose.pose.position);
+  configure_costmap(50u, 0.1);
+  constexpr double max_robot_pose_search_dist = 10.0;
+  configure_controller(max_robot_pose_search_dist, false, false, min_tunring_radius);
+
+  // Set a plan in a straight line from the robot
+  nav_msgs::msg::Path path;
+  path.header.frame_id = PATH_FRAME;
+  path.header.stamp = transform_time_;
+  path.poses.resize(10);
+  for (uint i = 0; i != path.poses.size(); i++) {
+    path.poses[i].header.frame_id = PATH_FRAME;
+    path.poses[i].header.stamp = transform_time_;
+    path.poses[i].pose.position.y = static_cast<double>(30 + i);
+    path.poses[i].pose.position.x = static_cast<double>(25);
+  }
+
+  ctrl_->setPlan(path);
+  ctrl_->activate();
+
+  // Set velocity
+  geometry_msgs::msg::Twist robot_velocity;
+  robot_velocity.linear.x = 0.0;
+  robot_velocity.angular.z = 0.0;
+
+  auto cmd_vel = ctrl_->computeVelocityCommandsWrapper(robot_pose, robot_velocity, &checker_);
+  double turning_radius = cmd_vel.twist.linear.x / cmd_vel.twist.angular.z;
+
+  EXPECT_GT(turning_radius, min_tunring_radius);
 }
