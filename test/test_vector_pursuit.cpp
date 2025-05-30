@@ -1284,5 +1284,5 @@ TEST_F(ComputeVelocityCommandsTest, ackermannConstraints)
   auto cmd_vel = ctrl_->computeVelocityCommandsWrapper(robot_pose, robot_velocity, &checker_);
   double turning_radius = cmd_vel.twist.linear.x / cmd_vel.twist.angular.z;
 
-  EXPECT_GT(turning_radius, min_tunring_radius);
+  EXPECT_GT(turning_radius, min_turning_radius);
 }
