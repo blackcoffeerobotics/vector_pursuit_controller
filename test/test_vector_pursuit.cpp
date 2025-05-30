@@ -1253,13 +1253,13 @@ TEST_F(ComputeVelocityCommandsTest, ackermannConstraints)
   robot_pose.pose.position.y = 25.0;
   robot_pose.pose.position.z = 0.0;
 
-  double min_tunring_radius = 2.2;
+  double min_turning_radius = 2.2;
 
   // setup
   setup_transforms(robot_pose.pose.position);
   configure_costmap(50u, 0.1);
   constexpr double max_robot_pose_search_dist = 10.0;
-  configure_controller(max_robot_pose_search_dist, false, false, min_tunring_radius);
+  configure_controller(max_robot_pose_search_dist, false, false, min_turning_radius);
 
   // Set a plan in a straight line from the robot
   nav_msgs::msg::Path path;
