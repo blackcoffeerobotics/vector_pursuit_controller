@@ -353,6 +353,7 @@ geometry_msgs::msg::TwistStamped VectorPursuitController::computeVelocityCommand
   if (shouldRotateToGoalHeading(lookahead_point)) {
     double angle_to_goal = tf2::getYaw(transformed_plan.poses.back().pose.orientation);
     rotateToHeading(linear_vel, angular_vel, angle_to_goal, last_cmd_vel_);
+    applyAngularBraking(angular_vel, angle_to_goal, last_cmd_vel_);
   } else if (shouldRotateToPath(lookahead_point, angle_to_heading, sign)) {
     rotateToHeading(linear_vel, angular_vel, angle_to_heading, last_cmd_vel_);
   } else {
@@ -671,6 +672,19 @@ void VectorPursuitController::rotateToHeading(
   const double min_feasible_angular_speed = curr_speed.angular.z - max_angular_accel_ * dt;
   const double max_feasible_angular_speed = curr_speed.angular.z + max_angular_accel_ * dt;
   angular_vel = std::clamp(angular_vel, min_feasible_angular_speed, max_feasible_angular_speed);
+}
+
+void VectorPursuitController::applyAngularBraking(
+  double & angular_vel, const double & angle_to_path, const geometry_msgs::msg::Twist & curr_speed)
+{
+  const double sign = angle_to_path > 0.0 ? 1.0 : -1.0;
+  const double time_to_stop = std::abs(curr_speed.angular.z) / max_angular_accel_;
+  const double angle_to_stop = sign * 0.5 * max_angular_accel_ * std::pow(time_to_stop, 2) +
+                               curr_speed.angular.z * time_to_stop;
+  if (std::abs(angle_to_stop) >= std::abs(angle_to_path)) {
+    // Need to start braking to avoid overshoot
+    angular_vel = sign * std::max(0.0, std::abs(curr_speed.angular.z) - max_angular_accel_ * control_duration_);
+  }
 }
 
 bool VectorPursuitController::isCollisionImminent(
