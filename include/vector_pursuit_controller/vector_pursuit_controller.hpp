@@ -288,6 +288,15 @@ protected:
     const double & angle_to_path, const geometry_msgs::msg::Twist & curr_speed);
 
   /**
+   * @brief Apply angular braking to stop at desired angle
+   * @param angular_vel angular velocity
+   * @param angle_to_path Angle of robot output relative to lookahead point
+   * @param curr_speed the current robot speed
+   */
+  void applyAngularBraking(
+    double & angular_vel, const double & angle_to_path, const geometry_msgs::msg::Twist & curr_speed);
+
+  /**
    * Get the greatest extent of the costmap in meters from the center.
    * @return max of distance from center in meters to edge of costmap
    */
