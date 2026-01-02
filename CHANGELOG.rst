@@ -2,8 +2,8 @@
 Changelog for package vector_pursuit_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.2.0 (2026-01-02)
+------------------
 * Prevent overshoot for final rotation
 * Contributors: Tatsuro Sakaguchi
 
