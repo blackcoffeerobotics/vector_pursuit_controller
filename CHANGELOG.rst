@@ -2,8 +2,8 @@
 Changelog for package vector_pursuit_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+1.0.2 (2026-01-02)
+------------------
 * Fix minor: minor typo
 * FIX: typo in turning_radius
 * Added unit test for Ackermann constraints (`#14 <https://github.com/blackcoffeerobotics/vector_pursuit_controller/issues/14>`_)
