@@ -2,6 +2,11 @@
 Changelog for package vector_pursuit_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Prevent overshoot for final rotation
+* Contributors: Tatsuro Sakaguchi
+
 1.1.0 (2025-05-25)
 -----------
 * Added jazzy compliant params and launch file
