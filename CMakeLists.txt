@@ -13,6 +13,7 @@ find_package(pluginlib REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(angles REQUIRED)
 
 nav2_package()
 set(CMAKE_CXX_STANDARD 17)
@@ -34,6 +35,7 @@ set(dependencies
   tf2
   tf2_geometry_msgs
   tf2_ros
+  angles
 )
 
 set(library_name vector_pursuit_controller)
