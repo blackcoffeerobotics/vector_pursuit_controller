@@ -1233,3 +1233,58 @@ TEST_F(ComputeVelocityCommandsTest, rotateToHeading)
   EXPECT_EQ(cmd_vel.twist.linear.x, 0.0);
   EXPECT_NEAR(cmd_vel.twist.angular.z, 0.16, 0.01);
 }
+
+// Regression test for using the odometry-reported speed (closed loop) rather
+// than the controller's own last commanded twist (open loop) as the
+// "current speed" fed into acceleration limiting. If the last commanded
+// twist were used instead, a robot that never actually reaches its commanded
+// speed (e.g. due to motor saturation) would see the commanded speed climb
+// every cycle regardless, since the controller would believe it had already
+// reached the previous command.
+TEST_F(ComputeVelocityCommandsTest, usesReportedSpeedNotLastCommandForAccelLimit)
+{
+  geometry_msgs::msg::PoseStamped robot_pose;
+  robot_pose.header.frame_id = COSTMAP_FRAME;
+  robot_pose.header.stamp = transform_time_;
+  robot_pose.pose.position.x = 1.0;
+  robot_pose.pose.position.y = 1.0;
+  robot_pose.pose.position.z = 0.0;
+
+  // setup
+  setup_transforms(robot_pose.pose.position);
+  configure_costmap(50u, 0.1);
+  constexpr double max_robot_pose_search_dist = 10.0;
+  configure_controller(max_robot_pose_search_dist, false);
+
+  // Long straight plan, far from the goal, so acceleration limiting -
+  // rather than curvature or approach scaling - is the binding constraint.
+  nav_msgs::msg::Path path;
+  path.header.frame_id = PATH_FRAME;
+  path.header.stamp = transform_time_;
+  path.poses.resize(50);
+  for (uint i = 0; i != path.poses.size(); i++) {
+    path.poses[i].header.frame_id = PATH_FRAME;
+    path.poses[i].header.stamp = transform_time_;
+    path.poses[i].pose.position.y = 1.0;
+    path.poses[i].pose.position.x = static_cast<double>(i);
+  }
+
+  ctrl_->setPlan(path);
+  ctrl_->activate();
+
+  // The robot reports zero speed on every cycle, as if it never actually
+  // moved (e.g. stalled/saturated hardware).
+  geometry_msgs::msg::Twist robot_velocity;
+  robot_velocity.linear.x = 0.0;
+  robot_velocity.angular.z = 0.0;
+
+  auto first_cmd = ctrl_->computeVelocityCommandsWrapper(robot_pose, robot_velocity, &checker_);
+  auto second_cmd = ctrl_->computeVelocityCommandsWrapper(robot_pose, robot_velocity, &checker_);
+  auto third_cmd = ctrl_->computeVelocityCommandsWrapper(robot_pose, robot_velocity, &checker_);
+
+  // Since the reported speed never changes, the commanded speed - which is
+  // bounded to one acceleration step away from the *reported* speed - must
+  // not keep climbing cycle over cycle.
+  EXPECT_NEAR(first_cmd.twist.linear.x, second_cmd.twist.linear.x, 1e-9);
+  EXPECT_NEAR(second_cmd.twist.linear.x, third_cmd.twist.linear.x, 1e-9);
+}
