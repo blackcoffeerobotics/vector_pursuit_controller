@@ -392,11 +392,9 @@ geometry_msgs::msg::TwistStamped VectorPursuitController::computeVelocityCommand
   cmd_vel.twist.linear.x = linear_vel;
   cmd_vel.twist.angular.z = angular_vel;
 
-  // TODO(kostubh_bcr): BUG in recieved speed param from
-  // controller server (in binaries 1.1.15).
-  // Use speed instead when branch with the fix is merged.
+  // Cache the actual reported speed (closed loop) for next cycle's
+  // acceleration limiting.
   last_cmd_vel_ = speed;
-  last_cmd_vel_ = cmd_vel.twist;
   return cmd_vel;
 }
 
