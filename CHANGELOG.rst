@@ -2,6 +2,24 @@
 Changelog for package vector_pursuit_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use actual odometry speed for closed-loop acceleration limiting (`#23 <https://github.com/blackcoffeerobotics/vector_pursuit_controller/issues/23>`_)
+  The last_cmd_vel\_ member was being overwritten with the controller's own
+  just-computed output instead of the real speed argument from
+  controller_server, making acceleration limiting open-loop. Under motor
+  saturation/lag this lets commanded speed climb unbounded regardless of
+  the robot's real speed (issue `#20 <https://github.com/blackcoffeerobotics/vector_pursuit_controller/issues/20>`_).
+  Nav2's own OdomSubscriber had a data race making this speed value
+  occasionally unreliable, but that's fixed on the jazzy branch
+  (ros-navigation/navigation2@46abdba34ee2495b3e6c06967f7e7edd06f4c194),
+  so it's safe to trust it here.
+  Adds a regression test proving the fix: reported speed held flat across
+  cycles must not let commanded speed keep climbing.
+  Co-authored-by: sambhav_bcr <sambhav@blackcoffeerobotics.com>
+  Co-authored-by: Claude Sonnet 5 <noreply@anthropic.com>
+* Contributors: Sambhav Jain
+
 2.0.0 (2026-01-02)
 ------------------
 * Prevent overshoot for final rotation
