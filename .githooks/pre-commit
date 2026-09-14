@@ -1,0 +1,22 @@
+#!/bin/sh
+# Pre-commit hook to prevent commits with placeholder author name or email
+
+NAME=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*\) <.*> .*/\1/p')
+EMAIL=$(git var GIT_AUTHOR_IDENT | sed -n 's/^.* <\(.*\)> .*/\1/p')
+
+# Block default placeholder author identity
+if [ "$NAME" = "Your Name" ] || echo "$NAME" | grep -iq "your name"; then
+    echo "ERROR: Commit rejected! Git author name is set to placeholder '$NAME'." >&2
+    echo "Please configure your git user name:" >&2
+    echo "  git config user.name \"Firstname Lastname\"" >&2
+    exit 1
+fi
+
+if echo "$EMAIL" | grep -iq "example\.todo"; then
+    echo "ERROR: Commit rejected! Git author email contains placeholder domain '$EMAIL'." >&2
+    echo "Please configure your git user email:" >&2
+    echo "  git config user.email \"you@example.com\"" >&2
+    exit 1
+fi
+
+exit 0
