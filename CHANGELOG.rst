@@ -2,8 +2,8 @@
 Changelog for package vector_pursuit_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+2.0.1 (2026-09-14)
+------------------
 * Use actual odometry speed for closed-loop acceleration limiting (`#23 <https://github.com/blackcoffeerobotics/vector_pursuit_controller/issues/23>`_)
   The last_cmd_vel\_ member was being overwritten with the controller's own
   just-computed output instead of the real speed argument from
