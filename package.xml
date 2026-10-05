@@ -4,9 +4,8 @@
   <name>vector_pursuit_controller</name>
   <version>1.0.2</version>
   <description>Vector Pursuit Controller</description>
-  <maintainer email="kostubh@blackcoffeerobotics.com">Kostubh Khandelwal</maintainer>
+  <maintainer email="sambhav@blackcoffeerobotics.com">Kostubh Khandelwal</maintainer>
   <maintainer email="gaurav@blackcoffeerobotics.com">Gaurav Gupta</maintainer>
-  <maintainer email="arthur@blackcoffeerobotics.com">Arthur Gomes</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
